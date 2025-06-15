@@ -13,3 +13,21 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Game {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String
+  price       Decimal    @db.Decimal(10, 2)
+  rating      Float
+  image       Bytes
+  releaseDate DateTime
+  categories  category[]
+  createdAt   DateTime   @default(now())
+}
+
+model category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  games Game[]
+}
