@@ -11,7 +11,7 @@ const app = express();
 app.set("json spaces", 5);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/games", createGameRouter);
+app.use("/game", createGameRouter);
 app.use("/", getGameImageRtr);
 app.use("/", getGameRtr);
 app.use("/delete", deleteGameByIdRtr);

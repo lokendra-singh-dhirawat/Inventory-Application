@@ -1,9 +1,10 @@
 import express from "express";
-import { getAllGameCntrl, getGameByIdCntrl } from "../controllers/getGameCntrl";
+import getAllGameCntrl from "../controllers/getAllGameCntrl";
+import getGameByIdCntrl from "../controllers/getGameByIdCntrl";
 
 const router = express.Router();
 
-router.get("/games", getAllGameCntrl);
-router.get("/games/:id", getGameByIdCntrl);
+router.get("/game", getAllGameCntrl);
+router.get("/game/:id", getGameByIdCntrl);
 
 export default router;

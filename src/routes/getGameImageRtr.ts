@@ -3,6 +3,6 @@ import getGameImageCntrl from "../controllers/getGameImageCntrl";
 
 const router = express.Router();
 
-router.get("/games/image/:id", getGameImageCntrl);
+router.get("/game/image/:id", getGameImageCntrl);
 
 export default router;
