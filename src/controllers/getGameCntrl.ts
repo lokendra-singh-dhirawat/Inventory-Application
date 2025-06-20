@@ -31,7 +31,10 @@ export const getAllGameCntrl = async (
       imageUrl: `${req.protocol}://${req.get("host")}/games/image/${game.id}`,
     }));
 
-    res.json(games);
+    res.json({
+      success: true,
+      data: response,
+    });
   } catch (error) {
     console.error("Error fetching games:", error);
     res.status(500).json({ error: "Error fetching games." });
