@@ -1,18 +1,16 @@
 import express from "express";
 import dotenv from "dotenv";
-import createGameRouter from "./routes/createGameRoute";
-
+import createGameRouter from "./routes/createGameRtr";
+import getGameImageRtr from "./routes/getGameImageRtr";
 dotenv.config();
 
 const app = express();
 
+app.set("json spaces", 5);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/games", createGameRouter);
-app.get("/", (req, res) => {
-  res.send("Server is alive!");
-});
-
+app.use("/", getGameImageRtr);
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`);

@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const createGame = async (req: Request, res: Response): Promise<void> => {
+const createGameCntrl = async (req: Request, res: Response): Promise<void> => {
   console.log("BODY:", req.body);
   console.log("FILE:", req.file);
   try {
@@ -17,7 +17,8 @@ const createGame = async (req: Request, res: Response): Promise<void> => {
     } = req.body;
 
     const ImageBuffer = req.file?.buffer;
-    if (!ImageBuffer) {
+    const ImageMimeType = req.file?.mimetype;
+    if (!ImageBuffer || !ImageMimeType) {
       res.status(400).json({ error: "Image is required." });
       return;
     }
@@ -33,6 +34,7 @@ const createGame = async (req: Request, res: Response): Promise<void> => {
         releaseDate: new Date(releaseDate),
         rating: parseFloat(rating),
         image: ImageBuffer,
+        imageMimeType: ImageMimeType,
         categories: {
           connect: categoryIds?.map((id: number) => ({ id })),
         },
@@ -44,6 +46,7 @@ const createGame = async (req: Request, res: Response): Promise<void> => {
         price: true,
         releaseDate: true,
         rating: true,
+        imageMimeType: true,
         categories: {
           select: {
             id: true,
@@ -52,21 +55,11 @@ const createGame = async (req: Request, res: Response): Promise<void> => {
         },
       },
     });
-
-    res.status(201).json({
-      success: true,
-      message: "Game created successfully",
-      data: {
-        ...newgame,
-        imageUrl: `${req.protocol}://${req.get("host")}/games/${
-          newgame.id
-        }/image`,
-      },
-    });
+    res.status(201).json(newgame);
   } catch (error) {
     res.status(500).json({ error: "Something went wrong." });
     console.error(error);
   }
 };
 
-export default createGame;
+export default createGameCntrl;
