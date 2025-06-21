@@ -4,6 +4,7 @@ import createGameRouter from "./routes/createGameRtr";
 import getGameImageRtr from "./routes/getGameImageRtr";
 import getGameRtr from "./routes/getGameRtr";
 import deleteGameByIdRtr from "./routes/deleteGameByIdRtr";
+import updateGameRtr from "./routes/updateGameRtr";
 dotenv.config();
 
 const app = express();
@@ -15,6 +16,7 @@ app.use("/game", createGameRouter);
 app.use("/", getGameImageRtr);
 app.use("/", getGameRtr);
 app.use("/delete", deleteGameByIdRtr);
+app.use("/update", updateGameRtr);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
