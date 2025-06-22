@@ -10,7 +10,9 @@ class GameCntrl {
   private GameResponce(game: any, req: Request) {
     return {
       ...game,
-      imageUrl: game.id ? `http://localhost:3000/games/${game.id}/image` : null,
+      imageUrl: game.id
+        ? `${req.protocol}://${req.get("host")}/game/image/${game.id}`
+        : null,
     };
   }
 
@@ -68,7 +70,7 @@ class GameCntrl {
         },
       });
 
-      const response = this.GameResponce(newgame);
+      const response = this.GameResponce(newgame, req);
       res.json({
         success: true,
         data: response,
@@ -91,9 +93,13 @@ class GameCntrl {
       res.status(200).json({
         message: "Game deleted successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting game:", error);
-      res.status(500).json({ error: "Error deleting game." });
+      if (error.code === "P2025") {
+        res.status(404).json({ error: "Game not found." });
+      } else {
+        res.status(500).json({ error: "Error deleting game." });
+      }
     }
   };
 
@@ -121,7 +127,7 @@ class GameCntrl {
         },
       });
 
-      const response = games.map((game) => this.GameResponce(game));
+      const response = games.map((game) => this.GameResponce(game, req));
 
       res.json({
         success: true,
@@ -169,7 +175,7 @@ class GameCntrl {
           name: category.name,
         };
       });
-      const response = this.GameResponce(game);
+      const response = this.GameResponce(game, req);
       res.json({
         success: true,
         data: response,
@@ -184,7 +190,7 @@ class GameCntrl {
     req: Request,
     res: Response
   ): Promise<void> => {
-    const gameId = req.params.id;
+    const gameId = Number(req.params.id);
 
     if (!gameId) {
       res.status(400).json({ error: "Game ID is required." });
@@ -261,11 +267,19 @@ class GameCntrl {
           },
         },
       });
-      const UpdatedResponse = this.GameResponce(UpdatedGame);
+      const UpdatedResponse = this.GameResponce(UpdatedGame, req);
       res.status(200).json(UpdatedResponse);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating game:", error);
-      res.status(500).json({ error: "Error updating game." });
+      if (error.code === "P2025") {
+        res.status(404).json({ error: "Game not found." });
+      } else if (error.code === "P2003") {
+        res
+          .status(400)
+          .json({ error: "One or more category IDs provided do not exist." });
+      } else {
+        res.status(500).json({ error: "Error updating game." });
+      }
     }
   };
 
@@ -302,7 +316,7 @@ class GameCntrl {
           },
         },
       });
-      const gameResponse = this.GameResponce(updatedImage);
+      const gameResponse = this.GameResponce(updatedImage, req);
       res.status(200).json(gameResponse);
     } catch (error) {
       console.error("Error updating image:", error);
@@ -310,3 +324,5 @@ class GameCntrl {
     }
   };
 }
+
+export const gameCntrl = new GameCntrl();
