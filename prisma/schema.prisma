@@ -8,16 +8,17 @@ datasource db {
 }
 
 model Game {
-  id            Int        @id @default(autoincrement())
-  name          String
-  description   String
-  price         Decimal    @db.Decimal(10, 2)
-  rating        Float
-  image         Bytes
-  imageMimeType String?
-  releaseDate   DateTime
-  categories    category[]
-  createdAt     DateTime   @default(now())
+  id             Int        @id @default(autoincrement())
+  name           String
+  description    String
+  price          Decimal    @db.Decimal(10, 2)
+  rating         Float
+  image          Bytes
+  imageMimeType  String?
+  imageUpdatedAt DateTime   @default(now())
+  releaseDate    DateTime
+  categories     category[]
+  createdAt      DateTime   @default(now())
 }
 
 model category {

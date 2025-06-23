@@ -8,11 +8,14 @@ class GameCntrl {
   }
 
   private GameResponce(game: any, req: Request) {
+    const baseUrl = `${req.protocol}://${req.get("host")}/game/image/${
+      game.id
+    }`;
+    const cacheBuster = new Date().getTime();
+
     return {
       ...game,
-      imageUrl: game.id
-        ? `${req.protocol}://${req.get("host")}/game/image/${game.id}`
-        : null,
+      imageUrl: game.id ? `${baseUrl}?v=${cacheBuster}` : null,
     };
   }
 
@@ -32,6 +35,7 @@ class GameCntrl {
 
       const ImageBuffer = req.file?.buffer;
       const ImageMimeType = req.file?.mimetype;
+
       if (!ImageBuffer || !ImageMimeType) {
         res.status(400).json({ error: "Image is required." });
         return;
@@ -301,6 +305,7 @@ class GameCntrl {
         data: {
           image: ImageBuffer,
           imageMimeType: ImageMimeType,
+          imageUpdatedAt: new Date(),
         },
         select: {
           id: true,
