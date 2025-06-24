@@ -48,9 +48,9 @@ class GameCntrl {
         data: {
           name,
           description,
-          price: parseFloat(price),
-          releaseDate: new Date(releaseDate),
-          rating: parseFloat(rating),
+          price,
+          releaseDate,
+          rating,
           image: ImageBuffer,
           imageMimeType: ImageMimeType,
           categories: {
@@ -169,16 +169,10 @@ class GameCntrl {
         },
       });
       if (!game) {
-        res.status(404).json({ error: "Invalid game ID" });
+        res.status(404).json({ error: "Game not found." });
         return;
       }
 
-      game.categories = game.categories.map((category) => {
-        return {
-          id: category.id,
-          name: category.name,
-        };
-      });
       const response = this.GameResponce(game, req);
       res.json({
         success: true,
@@ -196,11 +190,6 @@ class GameCntrl {
   ): Promise<void> => {
     const gameId = Number(req.params.id);
 
-    if (!gameId) {
-      res.status(400).json({ error: "Game ID is required." });
-      return;
-    }
-
     try {
       const game = await this.prisma.game.findUnique({
         where: { id: Number(gameId) },
@@ -208,7 +197,7 @@ class GameCntrl {
       });
 
       if (!game || !game.image || !game.imageMimeType) {
-        res.status(404).json({ error: "Game not found." });
+        res.status(404).json({ error: "Image not found for this game." });
         return;
       }
 
@@ -226,10 +215,7 @@ class GameCntrl {
   ): Promise<void> => {
     try {
       const gameId = req.params.id;
-      if (!gameId) {
-        res.status(400).json({ error: "Game ID is required." });
-        return;
-      }
+
       const { name, description, price, releaseDate, rating, categoryIds } =
         req.body;
 
@@ -295,10 +281,6 @@ class GameCntrl {
       const gameId = req.params.id;
       const ImageBuffer = req.file?.buffer;
       const ImageMimeType = req.file?.mimetype;
-      if (!gameId) {
-        res.status(400).json({ error: "Game ID is required." });
-        return;
-      }
 
       const updatedImage = await this.prisma.game.update({
         where: { id: Number(gameId) },
@@ -316,6 +298,7 @@ class GameCntrl {
           rating: true,
           createdAt: true,
           imageMimeType: true,
+          imageUpdatedAt: true,
           categories: {
             select: { id: true, name: true },
           },
