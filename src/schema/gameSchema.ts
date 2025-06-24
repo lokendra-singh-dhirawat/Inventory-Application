@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-class zodSchema {
+export class zodSchema {
   static createSchema = z.object({
     name: z
       .string()
