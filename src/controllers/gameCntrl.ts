@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import logger from "../config/logger";
 
 class GameCntrl {
   private prisma: PrismaClient;
@@ -79,9 +80,12 @@ class GameCntrl {
         success: true,
         data: response,
       });
-    } catch (error) {
+      logger.info(`Game created successfully with id: ${newgame.id}`);
+    } catch (error: any) {
       res.status(500).json({ error: "Something went wrong." });
-      console.error(error);
+      logger.error(`createGameCntrl: Error creating game: ${error.message}`, {
+        error,
+      });
     }
   };
 
@@ -97,8 +101,14 @@ class GameCntrl {
       res.status(200).json({
         message: "Game deleted successfully",
       });
+      logger.info(`Game deleted successfully with id: ${gameId}`);
     } catch (error: any) {
-      console.error("Error deleting game:", error);
+      logger.error(
+        `deleteGameByIdCntrl: Error deleting game: ${error.message}`,
+        {
+          error,
+        }
+      );
       if (error.code === "P2025") {
         res.status(404).json({ error: "Game not found." });
       } else {
@@ -137,8 +147,10 @@ class GameCntrl {
         success: true,
         data: response,
       });
-    } catch (error) {
-      console.error("Error fetching games:", error);
+    } catch (error: any) {
+      logger.error(`getAllGameCntrl: Error fetching game: ${error.message}`, {
+        error,
+      });
       res.status(500).json({ error: "Error fetching games." });
     }
   };
@@ -178,8 +190,10 @@ class GameCntrl {
         success: true,
         data: response,
       });
-    } catch (error) {
-      console.error("Error fetching game:", error);
+    } catch (error: any) {
+      logger.error(`getGameByIdCntrl: Error fetching game: ${error.message}`, {
+        error,
+      });
       res.status(500).json({ error: "Error fetching game." });
     }
   };
@@ -203,8 +217,13 @@ class GameCntrl {
 
       res.setHeader("Content-Type", game.imageMimeType);
       res.send(game.image);
-    } catch (error) {
-      console.error("Error fetching image:", error);
+    } catch (error: any) {
+      logger.error(
+        `getGameImageCntrl: Error fetching image: ${error.message}`,
+        {
+          error,
+        }
+      );
       res.status(500).json({ error: "Error fetching image." });
     }
   };
@@ -259,8 +278,13 @@ class GameCntrl {
       });
       const UpdatedResponse = this.GameResponce(UpdatedGame, req);
       res.status(200).json(UpdatedResponse);
+      logger.info(
+        `updateGameCntrl: Game updated successfully of game id ${gameId}.`
+      );
     } catch (error: any) {
-      console.error("Error updating game:", error);
+      logger.error(`updateGameCntrl: Error updating game: ${error.message}`, {
+        error,
+      });
       if (error.code === "P2025") {
         res.status(404).json({ error: "Game not found." });
       } else if (error.code === "P2003") {
@@ -306,8 +330,13 @@ class GameCntrl {
       });
       const gameResponse = this.GameResponce(updatedImage, req);
       res.status(200).json(gameResponse);
-    } catch (error) {
-      console.error("Error updating image:", error);
+      logger.info(
+        `updateImageCntrl: Image updated successfully of game id ${gameId}.`
+      );
+    } catch (error: any) {
+      logger.error(`updateImageCntrl: Error updating image: ${error.message}`, {
+        error,
+      });
       res.status(500).json({ error: "Error updating image." });
     }
   };
