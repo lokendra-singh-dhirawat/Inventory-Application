@@ -1,5 +1,3 @@
-import { tr } from "zod/v4/locales";
-
 class AppError extends Error {
   statusCode: number;
   isOperational: boolean;
