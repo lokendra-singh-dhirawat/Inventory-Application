@@ -1,7 +1,13 @@
 import type { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import logger from "../config/logger";
-
+import { AppError } from "../utils/error";
+import {
+  NotFoundError,
+  BadRequestError,
+  PrismaClientError,
+} from "../utils/error";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 class GameCntrl {
   private prisma: PrismaClient;
   constructor() {
@@ -38,8 +44,7 @@ class GameCntrl {
       const ImageMimeType = req.file?.mimetype;
 
       if (!ImageBuffer || !ImageMimeType) {
-        res.status(400).json({ error: "Image is required." });
-        return;
+        throw new BadRequestError("Image is required", "IMAGE_MISSING_ERROR");
       }
 
       const categoryIds = Array.isArray(rawCategoryIds)
@@ -82,10 +87,17 @@ class GameCntrl {
       });
       logger.info(`Game created successfully with id: ${newgame.id}`);
     } catch (error: any) {
-      res.status(500).json({ error: "Something went wrong." });
-      logger.error(`createGameCntrl: Error creating game: ${error.message}`, {
-        error,
-      });
+      if (error instanceof AppError) {
+        throw error;
+      }
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw error;
+      }
+      throw new AppError(
+        `An unexpected error occurred during game creation: ${error.message}`, // Include original error message for debugging
+        500,
+        "UNEXPECTED_SERVER_ERROR"
+      );
     }
   };
 
@@ -103,17 +115,17 @@ class GameCntrl {
       });
       logger.info(`Game deleted successfully with id: ${gameId}`);
     } catch (error: any) {
-      logger.error(
-        `deleteGameByIdCntrl: Error deleting game: ${error.message}`,
-        {
-          error,
-        }
-      );
-      if (error.code === "P2025") {
-        res.status(404).json({ error: "Game not found." });
-      } else {
-        res.status(500).json({ error: "Error deleting game." });
+      if (error instanceof AppError) {
+        throw error;
       }
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw error;
+      }
+      throw new AppError(
+        `An unexpected error occurred during game deletion: ${error.message}`, // Include original error message for debugging
+        500,
+        "UNEXPECTED_SERVER_ERROR"
+      );
     }
   };
 
@@ -148,10 +160,13 @@ class GameCntrl {
         data: response,
       });
     } catch (error: any) {
-      logger.error(`getAllGameCntrl: Error fetching game: ${error.message}`, {
-        error,
-      });
-      res.status(500).json({ error: "Error fetching games." });
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        `getAllGameCntrl: Error getting all games: ${error.message}`,
+        500
+      );
     }
   };
 
@@ -181,8 +196,7 @@ class GameCntrl {
         },
       });
       if (!game) {
-        res.status(404).json({ error: "Game not found." });
-        return;
+        throw new NotFoundError("Game not found", "GAME_NOT_FOUND_ERROR");
       }
 
       const response = this.GameResponce(game, req);
@@ -191,10 +205,14 @@ class GameCntrl {
         data: response,
       });
     } catch (error: any) {
-      logger.error(`getGameByIdCntrl: Error fetching game: ${error.message}`, {
-        error,
-      });
-      res.status(500).json({ error: "Error fetching game." });
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        `An unexpected error occurred while fetching game: ${error.message}`,
+        500,
+        "UNEXPECTED_SERVER_ERROR"
+      );
     }
   };
 
@@ -211,20 +229,23 @@ class GameCntrl {
       });
 
       if (!game || !game.image || !game.imageMimeType) {
-        res.status(404).json({ error: "Image not found for this game." });
-        return;
+        throw new NotFoundError(
+          "Game image not found",
+          "GAME_IMAGE_NOT_FOUND_ERROR"
+        );
       }
 
       res.setHeader("Content-Type", game.imageMimeType);
       res.send(game.image);
     } catch (error: any) {
-      logger.error(
-        `getGameImageCntrl: Error fetching image: ${error.message}`,
-        {
-          error,
-        }
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        `An unexpected error occurred while fetching game image: ${error.message}`,
+        500,
+        "UNEXPECTED_SERVER_ERROR"
       );
-      res.status(500).json({ error: "Error fetching image." });
     }
   };
 
@@ -282,18 +303,17 @@ class GameCntrl {
         `updateGameCntrl: Game updated successfully of game id ${gameId}.`
       );
     } catch (error: any) {
-      logger.error(`updateGameCntrl: Error updating game: ${error.message}`, {
-        error,
-      });
-      if (error.code === "P2025") {
-        res.status(404).json({ error: "Game not found." });
-      } else if (error.code === "P2003") {
-        res
-          .status(400)
-          .json({ error: "One or more category IDs provided do not exist." });
-      } else {
-        res.status(500).json({ error: "Error updating game." });
+      if (error instanceof AppError) {
+        throw error;
       }
+      if (error instanceof PrismaClientError) {
+        throw error;
+      }
+      throw new AppError(
+        `An unexpected error occurred during game update: ${error.message}`,
+        500,
+        "UNEXPECTED_SERVER_ERROR"
+      );
     }
   };
 
@@ -334,10 +354,16 @@ class GameCntrl {
         `updateImageCntrl: Image updated successfully of game id ${gameId}.`
       );
     } catch (error: any) {
-      logger.error(`updateImageCntrl: Error updating image: ${error.message}`, {
-        error,
-      });
-      res.status(500).json({ error: "Error updating image." });
+      if (error instanceof AppError) {
+        throw error;
+      }
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw error;
+      }
+      throw new AppError(
+        `updateImageCntrl: Error updating image of game id ${req.params.id}: ${error.message}`,
+        500
+      );
     }
   };
 }
