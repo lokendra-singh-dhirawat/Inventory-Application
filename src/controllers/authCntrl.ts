@@ -6,8 +6,16 @@ import logger from "../config/logger";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import crypto from "crypto";
 import { AppError, ConflictError, UnauthorizedError } from "../utils/error";
-
+import type {user as PrismaUser} from '@prisma/client'
 const prisma = new PrismaClient();
+
+declare global{
+  namespace Express {
+    interface Request {
+    User?: PrismaUser
+    }
+  }
+}
 
 class AuthCntrl {
   private JWT_SECRET: string;
@@ -126,4 +134,14 @@ class AuthCntrl {
       throw new AppError("An unexpected error occurred during login.", 500);
     }
   };
+
+public logout = async (req: Request,res: Response): Promise<void> => {
+  try{
+    const userId = req.User?.id;
+    if (!userId){
+
+    }
+  }
+}
+
 }
