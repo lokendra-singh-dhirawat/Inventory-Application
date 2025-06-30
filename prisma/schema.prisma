@@ -19,6 +19,8 @@ model Game {
   releaseDate    DateTime
   categories     category[]
   createdAt      DateTime   @default(now())
+  user           user?      @relation(fields: [userId], references: [id])
+  userId         Int?
 }
 
 model category {
@@ -32,6 +34,8 @@ model user {
   email     String   @unique
   password  String
   name      String?
+  role      String   @default("user")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  games     Game[]
 }
