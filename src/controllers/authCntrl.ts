@@ -5,7 +5,12 @@ import { PrismaClient } from "@prisma/client";
 import logger from "../config/logger";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import crypto from "crypto";
-import { AppError, ConflictError, UnauthorizedError } from "../utils/error";
+import {
+  AppError,
+  BadRequestError,
+  ConflictError,
+  UnauthorizedError,
+} from "../utils/error";
 import type { user as PrismaUser } from "@prisma/client";
 const prisma = new PrismaClient();
 
@@ -161,6 +166,82 @@ class AuthCntrl {
         error,
       });
       throw new AppError("An unexpected error occurred during logout.", 500);
+    }
+  };
+
+  public refreshToken = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { refreshToken } = req.body;
+      if (!refreshToken) {
+        throw new BadRequestError(
+          "Refresh token is required",
+          "REFRESH_TOKEN_MISSING_ERROR"
+        );
+      }
+      const user = await prisma.user.findFirst({
+        where: {
+          refreshToken: refreshToken,
+          refreshTokenExpiresAt: {
+            gt: new Date(),
+          },
+        },
+      });
+
+      if (!user) {
+        logger.warn(
+          `Refresh token is attempt with invalid or expired: ${refreshToken} `
+        );
+        throw new UnauthorizedError(
+          "Invalid refresh or expired token.Please log in again",
+          "INVALID_REFRESH_TOKEN"
+        );
+      }
+
+      await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          refreshToken: null,
+          refreshTokenExpiresAt: null,
+        },
+      });
+      const newAccessToken = jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        this.JWT_SECRET,
+        {
+          expiresIn: this.ACCESS_TOKEN_EXPIRATION_TIME,
+        }
+      );
+
+      const newRefreshToken = this.genrateRefreshToken();
+      const newRefreshTokenExpiresAt = new Date(
+        Date.now() + this.REFRESH_TOKEN_EXPIRATION_TIME * 24 * 60 * 60 * 1000
+      );
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          refreshToken: newRefreshToken,
+          refreshTokenExpiresAt: newRefreshTokenExpiresAt,
+        },
+      });
+      logger.info(`User refreshed token: ${user.email} and issued new tokens.`);
+      res.status(200).json({
+        message: "Tokens refreshed successfully",
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        expiresIn: this.ACCESS_TOKEN_EXPIRATION_TIME,
+      });
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      logger.error(`Error during token refresh: ${error.message}`, { error });
+      throw new AppError(
+        "An unexpected error occurred during token refresh.",
+        500
+      );
     }
   };
 }
