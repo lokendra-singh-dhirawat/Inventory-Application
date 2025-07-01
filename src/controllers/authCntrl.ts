@@ -6,13 +6,13 @@ import logger from "../config/logger";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import crypto from "crypto";
 import { AppError, ConflictError, UnauthorizedError } from "../utils/error";
-import type {user as PrismaUser} from '@prisma/client'
+import type { user as PrismaUser } from "@prisma/client";
 const prisma = new PrismaClient();
 
-declare global{
+declare global {
   namespace Express {
     interface Request {
-    User?: PrismaUser
+      User?: PrismaUser;
     }
   }
 }
@@ -135,13 +135,32 @@ class AuthCntrl {
     }
   };
 
-public logout = async (req: Request,res: Response): Promise<void> => {
-  try{
-    const userId = req.User?.id;
-    if (!userId){
+  public logout = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.User?.id;
+      if (!userId) {
+        throw new UnauthorizedError("Unauthorized", "UNAUTHORIZED");
+      }
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          refreshToken: null,
+          refreshTokenExpiresAt: null,
+        },
+      });
 
+      logger.info(`User logged out: ${req.User?.email} and revoked tokens.`);
+      res.status(200).json({
+        message: "User logged out successfully",
+      });
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      logger.error(`Error during logout ${req.User?.email}: ${error.message}`, {
+        error,
+      });
+      throw new AppError("An unexpected error occurred during logout.", 500);
     }
-  }
-}
-
+  };
 }
