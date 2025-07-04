@@ -30,14 +30,16 @@ model category {
 }
 
 model user {
-  id                    Int       @id @default(autoincrement())
-  email                 String    @unique
-  password              String
-  name                  String?
-  role                  String    @default("user")
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-  games                 Game[]
-  refreshToken          String?   @unique
-  refreshTokenExpiresAt DateTime?
+  id                     Int       @id @default(autoincrement())
+  email                  String    @unique
+  password               String
+  name                   String?
+  role                   String    @default("user")
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  games                  Game[]
+  refreshToken           String?   @unique
+  refreshTokenExpiresAt  DateTime?
+  passwordResetToken     String?   @unique
+  passwordResetExpiresAt DateTime?
 }
