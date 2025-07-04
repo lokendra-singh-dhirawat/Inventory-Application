@@ -2,8 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import gameRtr from "./routes/gameRtr";
 import morgan from "morgan";
-import { error } from "winston";
 import errorHandler from "./middleware/errorHandler";
+import passport from "passport";
+import authRtr from "./routes/authRtr";
+import { configurePassport } from "./config/passport";
 
 dotenv.config();
 
@@ -13,7 +15,12 @@ app.use(morgan("dev"));
 app.set("json spaces", 5);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(passport.initialize());
+configurePassport();
+
+app.use("/auth", authRtr);
 app.use("/", gameRtr);
+
 app.use(errorHandler);
 
 const PORT = process.env.PORT;
