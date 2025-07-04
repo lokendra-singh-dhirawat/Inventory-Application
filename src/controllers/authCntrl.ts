@@ -11,16 +11,8 @@ import {
   ConflictError,
   UnauthorizedError,
 } from "../utils/error";
-import type { user as PrismaUser } from "@prisma/client";
-const prisma = new PrismaClient();
 
-declare global {
-  namespace Express {
-    interface Request {
-      User?: PrismaUser;
-    }
-  }
-}
+const prisma = new PrismaClient();
 
 class AuthCntrl {
   private JWT_SECRET: string;
@@ -142,10 +134,18 @@ class AuthCntrl {
 
   public logout = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = req.User?.id;
-      if (!userId) {
-        throw new UnauthorizedError("Unauthorized", "UNAUTHORIZED");
+      if (!req.user) {
+        logger.error(
+          "Logout: req.user is undefined after authentication middleware. This indicates a severe misconfiguration or bypass."
+        );
+        throw new UnauthorizedError(
+          "Authentication failed: User object missing.",
+          "MISSING_USER_OBJECT"
+        );
       }
+
+      const userId = (req.user as any).id;
+
       await prisma.user.update({
         where: { id: userId },
         data: {
@@ -154,7 +154,9 @@ class AuthCntrl {
         },
       });
 
-      logger.info(`User logged out: ${req.User?.email} and revoked tokens.`);
+      logger.info(
+        `User logged out: ${(req.user as any).email} and revoked tokens.`
+      );
       res.status(200).json({
         message: "User logged out successfully",
       });
@@ -162,10 +164,18 @@ class AuthCntrl {
       if (error instanceof AppError) {
         throw error;
       }
-      logger.error(`Error during logout ${req.User?.email}: ${error.message}`, {
-        error,
-      });
-      throw new AppError("An unexpected error occurred during logout.", 500);
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw error;
+      }
+
+      throw new AppError(
+        `An unexpected error occurred during logout for user ${
+          (req.user as any)?.email || "N/A"
+        }: ${error.message}`,
+        500,
+        "UNEXPECTED_SERVER_ERROR"
+      );
     }
   };
 
@@ -245,3 +255,5 @@ class AuthCntrl {
     }
   };
 }
+
+export const authCntrl = new AuthCntrl();
