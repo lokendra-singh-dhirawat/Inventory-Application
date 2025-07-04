@@ -254,6 +254,79 @@ class AuthCntrl {
       );
     }
   };
+
+  public changePassword = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      if (!req.user) {
+        logger.error(
+          "changePassword: req.user is undefined after auth middleware. Fatal error."
+        );
+        throw new AppError(
+          "Authentication failed: User object missing.",
+          500,
+          "MISSING_USER_OBJECT"
+        );
+      }
+
+      const userId = (req.user as any).id;
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        logger.error(
+          `changePassword: User ID ${userId} not found in DB after authentication. Data inconsistency.`
+        );
+        throw new UnauthorizedError("User not found.", "USER_NOT_FOUND");
+      }
+
+      const oldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+      if (!oldPasswordValid) {
+        throw new BadRequestError(
+          "Old password is incorrect.",
+          "INCORRECT_OLD_PASSWORD"
+        );
+      }
+      const hashedNewPassword = await bcrypt.hash(
+        newPassword,
+        this.BCRYPT_SALT_ROUNDS
+      );
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          password: hashedNewPassword,
+        },
+      });
+
+      logger.info(`User ${user.email} changed password successfully.`);
+      res.status(200).json({
+        message: "Password updated successfully",
+      });
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw error;
+      }
+      logger.error(
+        `Error changing password for user ${
+          (req.user as any)?.email || "N/A"
+        }: ${error.message}`,
+        { error }
+      );
+      throw new AppError(
+        "An unexpected error occurred during password change.",
+        500
+      );
+    }
+  };
 }
 
 export const authCntrl = new AuthCntrl();
