@@ -7,6 +7,7 @@ import {
   registerSchema,
   loginSchema,
   refreshTokenSchema,
+  changePasswordSchema,
 } from "../schema/authSchema";
 
 const router = Router();
@@ -30,5 +31,12 @@ router.post(
 );
 
 router.post("/logout", authenticated, authCntrl.logout);
+
+router.post(
+  "/change-password",
+  authenticated,
+  validationMiddleware.validateBody(changePasswordSchema),
+  authCntrl.changePassword
+);
 
 export default router;
