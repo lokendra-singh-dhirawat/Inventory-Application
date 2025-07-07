@@ -46,36 +46,6 @@ export const changePasswordSchema = z
     path: ["confirmNewPassword"],
   });
 
-export const forgotPasswordSchema = z.object({
-  email: z
-    .string()
-    .email("Invalid email address.")
-    .min(1, "Email is required."),
-});
-
-export const resetPasswordSchema = z
-  .object({
-    token: z.string().min(1, "Reset token is required."),
-    newPassword: z
-      .string()
-      .min(8, "New password must be at least 8 characters long.")
-      .regex(
-        /[A-Z]/,
-        "New password must include at least one uppercase letter."
-      )
-      .regex(
-        /[a-z]/,
-        "New password must include at least one lowercase letter."
-      )
-      .regex(/[0-9]/, "New password must include at least one number."),
-
-    confirmNewPassword: z.string().min(1, "Confirm new password is required."),
-  })
-  .refine((data) => data.newPassword === data.confirmNewPassword, {
-    message: "New passwords do not match.",
-    path: ["confirmNewPassword"],
-  });
-
 export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1, "Refresh token is required."),
 });
