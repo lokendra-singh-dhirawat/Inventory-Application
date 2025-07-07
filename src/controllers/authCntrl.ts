@@ -11,7 +11,7 @@ import {
   ConflictError,
   UnauthorizedError,
 } from "../utils/error";
-
+import type { User as PrismaUserType } from "@prisma/client";
 const prisma = new PrismaClient();
 
 class AuthCntrl {
@@ -143,8 +143,8 @@ class AuthCntrl {
           "MISSING_USER_OBJECT"
         );
       }
-
-      const userId = (req.user as any).id;
+      const currentUser = req.user as PrismaUserType;
+      const userId = currentUser.id;
 
       await prisma.user.update({
         where: { id: userId },
@@ -154,13 +154,12 @@ class AuthCntrl {
         },
       });
 
-      logger.info(
-        `User logged out: ${(req.user as any).email} and revoked tokens.`
-      );
+      logger.info(`User logged out: ${currentUser.email} and revoked tokens.`);
       res.status(200).json({
         message: "User logged out successfully",
       });
     } catch (error: any) {
+      const currentUser = req.user as PrismaUserType;
       if (error instanceof AppError) {
         throw error;
       }
@@ -171,7 +170,7 @@ class AuthCntrl {
 
       throw new AppError(
         `An unexpected error occurred during logout for user ${
-          (req.user as any)?.email || "N/A"
+          currentUser?.email || "N/A"
         }: ${error.message}`,
         500,
         "UNEXPECTED_SERVER_ERROR"
@@ -260,6 +259,7 @@ class AuthCntrl {
     res: Response
   ): Promise<void> => {
     try {
+      const currentUser = req.user as PrismaUserType;
       const { oldPassword, newPassword } = req.body;
       if (!req.user) {
         logger.error(
@@ -272,7 +272,7 @@ class AuthCntrl {
         );
       }
 
-      const userId = (req.user as any).id;
+      const userId = currentUser.id;
 
       const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -309,6 +309,7 @@ class AuthCntrl {
         message: "Password updated successfully",
       });
     } catch (error: any) {
+      const currentUser = req.user as PrismaUserType;
       if (error instanceof AppError) {
         throw error;
       }
@@ -316,9 +317,9 @@ class AuthCntrl {
         throw error;
       }
       logger.error(
-        `Error changing password for user ${
-          (req.user as any)?.email || "N/A"
-        }: ${error.message}`,
+        `Error changing password for user ${currentUser?.email || "N/A"}: ${
+          error.message
+        }`,
         { error }
       );
       throw new AppError(

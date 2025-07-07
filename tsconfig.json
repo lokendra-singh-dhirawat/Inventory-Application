@@ -7,6 +7,13 @@
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "allowJs": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
+    "baseUrl": "./",           // Add this for consistent module resolution
+    "rootDir": "./src",        // Add this to define your source root
+    "outDir": "./dist",        // Add this for compiled output directory (even with noEmit)
 
     // Bundler mode
     "moduleResolution": "bundler",
@@ -24,5 +31,14 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  // --- THESE ARRAYS MUST BE OUTSIDE compilerOptions ---
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

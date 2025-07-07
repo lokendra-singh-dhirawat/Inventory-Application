@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bcryptjs": "^3.0.0",
+   
     "@types/bun": "latest",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
