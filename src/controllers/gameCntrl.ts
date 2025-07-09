@@ -38,7 +38,7 @@ class GameCntrl {
         releaseDate,
         rating,
         categoryIds: rawCategoryIds,
-      } = req.body;
+      } = req.validateBody;
 
       const ImageBuffer = req.file?.buffer;
       const ImageMimeType = req.file?.mimetype;

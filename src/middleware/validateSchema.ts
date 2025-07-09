@@ -36,7 +36,7 @@ export class ValidationMiddleware {
   public validateBody(schema: ZodSchema) {
     return (req: Request, res: Response, next: NextFunction) => {
       try {
-        schema.parse(req.body);
+        req.validateBody = schema.parse(req.body);
         next();
       } catch (error) {
         if (error instanceof ZodError) {
