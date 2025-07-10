@@ -10,11 +10,7 @@ import { AuthorizeOwnerOrAdmin } from "src/middleware/authorization";
 const router = Router();
 
 //get all games
-router.get(
-  "/games",
-  validationMiddleware.validateParams(zodSchema.idParamSchema),
-  gameCntrl.getAllGameCntrl
-);
+router.get("/games", gameCntrl.getAllGameCntrl);
 
 //get game by id
 router.get(

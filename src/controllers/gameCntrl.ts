@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import logger from "../config/logger";
 import { AppError } from "../utils/error";
+import type { User as PrismaUserType } from "@prisma/client";
 import {
   NotFoundError,
   BadRequestError,
@@ -31,6 +32,20 @@ class GameCntrl {
     res: Response
   ): Promise<void> => {
     try {
+      const currentUser = req.user as PrismaUserType;
+
+      if (!req.user || !currentUser.id) {
+        logger.error(
+          "createGameCntrl: req.user missing after auth middleware."
+        );
+        throw new AppError(
+          "Authentication required to create a game.",
+          401,
+          "AUTH_REQUIRED_FOR_CREATE"
+        );
+      }
+      const userId = currentUser.id;
+
       const {
         name,
         description,
@@ -50,6 +65,7 @@ class GameCntrl {
       const categoryIds = Array.isArray(rawCategoryIds)
         ? rawCategoryIds.map((id) => Number(id))
         : [Number(rawCategoryIds)];
+
       const newgame = await this.prisma.game.create({
         data: {
           name,
@@ -59,6 +75,7 @@ class GameCntrl {
           rating,
           image: ImageBuffer,
           imageMimeType: ImageMimeType,
+          userId: userId,
           categories: {
             connect: categoryIds?.map((id: number) => ({ id })),
           },

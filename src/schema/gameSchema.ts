@@ -57,25 +57,27 @@ export class zodSchema {
       .min(10, "Description must be at least 10 characters long.")
       .max(1000, "Description cannot exceed 1000 characters.")
       .optional(),
-    price: z.preprocess(
-      (a) => parseFloat(a as string),
-      z.number().positive("Price must be a positive number.").optional()
-    ),
-    releaseDate: z.preprocess(
-      (a) => new Date(a as string),
-      z
-        .date()
-        .max(new Date(), "Release date cannot be in the future.")
-        .optional()
-    ),
-    rating: z.preprocess(
-      (a) => parseFloat(a as string),
-      z
-        .number()
-        .min(0, "Rating cannot be less than 0.")
-        .max(5, "Rating cannot exceed 5.")
-        .optional()
-    ),
+    price: z
+      .preprocess(
+        (a) => parseFloat(a as string),
+        z.number().positive("Price must be a positive number.")
+      )
+      .optional(),
+    releaseDate: z
+      .preprocess(
+        (a) => new Date(a as string),
+        z.date().max(new Date(), "Release date cannot be in the future.")
+      )
+      .optional(),
+    rating: z
+      .preprocess(
+        (a) => parseFloat(a as string),
+        z
+          .number()
+          .min(0, "Rating cannot be less than 0.")
+          .max(5, "Rating cannot exceed 5.")
+      )
+      .optional(),
     categoryIds: z
       .union([
         z
