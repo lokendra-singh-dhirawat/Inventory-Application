@@ -66,7 +66,7 @@ class GameCntrl {
         ? rawCategoryIds.map((id) => Number(id))
         : [Number(rawCategoryIds)];
 
-      const newgame = await this.prisma.game.create({
+      const newGameData = await this.prisma.game.create({
         data: {
           name,
           description,
@@ -97,12 +97,12 @@ class GameCntrl {
         },
       });
 
-      const response = this.GameResponce(newgame, req);
+      const response = this.GameResponce(newGameData, req);
       res.json({
         success: true,
         data: response,
       });
-      logger.info(`Game created successfully with id: ${newgame.id}`);
+      logger.info(`Game created successfully with id: ${newGameData.id}`);
     } catch (error: any) {
       if (error instanceof AppError) {
         throw error;

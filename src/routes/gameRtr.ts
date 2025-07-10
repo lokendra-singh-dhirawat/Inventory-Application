@@ -3,7 +3,6 @@ import { gameCntrl } from "../controllers/gameCntrl";
 import upload from "../middleware/uploadMiddleware";
 import { validationMiddleware } from "../middleware/validateSchema";
 import { zodSchema } from "../schema/gameSchema";
-import { authenticate } from "passport";
 import { authenticated } from "src/config/passport";
 import { AuthorizeOwnerOrAdmin } from "src/middleware/authorization";
 
