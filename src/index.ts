@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import gameRtr from "./routes/gameRtr";
 import morgan from "morgan";
+import cors from "cors";
 import errorHandler from "./middleware/errorHandler";
 import passport from "passport";
 import authRtr from "./routes/authRtr";
@@ -17,6 +18,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 configurePassport();
+
+const corsOptions = {
+  origin: "http://localhost:5173",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+app.use(cors(corsOptions));
 
 app.use("/auth", authRtr);
 app.use("/", gameRtr);
