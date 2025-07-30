@@ -113,3 +113,15 @@ export class zodSchema {
     ),
   });
 }
+
+export function idParamSchema(
+  idParamSchema: any
+): import("express-serve-static-core").RequestHandler<
+  import("express-serve-static-core").ParamsDictionary,
+  any,
+  any,
+  import("qs").ParsedQs,
+  Record<string, any>
+> {
+  throw new Error("Function not implemented.");
+}
