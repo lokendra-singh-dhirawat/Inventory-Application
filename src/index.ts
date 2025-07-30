@@ -7,6 +7,7 @@ import errorHandler from "./middleware/errorHandler";
 import passport from "passport";
 import authRtr from "./routes/authRtr";
 import { configurePassport } from "./config/passport";
+import categoryRtr from "./routes/categoryRtr";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use(cors(corsOptions));
 
 app.use("/auth", authRtr);
 app.use("/", gameRtr);
+app.use("/categories", categoryRtr);
 
 app.use(errorHandler);
 
