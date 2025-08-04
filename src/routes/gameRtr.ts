@@ -4,7 +4,7 @@ import upload from "../middleware/uploadMiddleware";
 import { validationMiddleware } from "../middleware/validateSchema";
 import { zodSchema } from "../schema/gameSchema";
 import { authenticated } from "src/config/passport";
-import { AuthorizeOwnerOrAdmin } from "src/middleware/authorization";
+import { AuthorizeUserOrAdmin } from "src/middleware/authorization";
 
 const router = Router();
 
@@ -31,6 +31,7 @@ router.post(
   authenticated,
   upload.single("image"),
   validationMiddleware.validateBody(zodSchema.createSchema),
+  AuthorizeUserOrAdmin("Game"),
   gameCntrl.createGameCntrl
 );
 
@@ -39,7 +40,7 @@ router.delete(
   "/game/:id",
   authenticated,
   validationMiddleware.validateParams(zodSchema.idParamSchema),
-  AuthorizeOwnerOrAdmin("Game"),
+  AuthorizeUserOrAdmin("Game"),
   gameCntrl.deleteGameByIdCntrl
 );
 
@@ -48,7 +49,7 @@ router.put(
   "/game/:id",
   authenticated,
   validationMiddleware.validateParams(zodSchema.idParamSchema),
-  AuthorizeOwnerOrAdmin("Game"),
+  AuthorizeUserOrAdmin("Game"),
   validationMiddleware.validateBody(zodSchema.updateGameSchema),
   gameCntrl.updateGameCntrl
 );
@@ -58,7 +59,7 @@ router.put(
   "/game/image/:id",
   authenticated,
   validationMiddleware.validateParams(zodSchema.idParamSchema),
-  AuthorizeOwnerOrAdmin("Game"),
+  AuthorizeUserOrAdmin("Game"),
   upload.single("image"),
   gameCntrl.updateImageCntrl
 );

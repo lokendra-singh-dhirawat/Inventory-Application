@@ -141,7 +141,7 @@ export const requireResourceOwnership =
     }
   };
 
-export const AuthorizeOwnerOrAdmin = (
+export const AuthorizeUserOrAdmin = (
   model: "Game" | "User",
   idParam: string = "id",
   userField: string = "userId"

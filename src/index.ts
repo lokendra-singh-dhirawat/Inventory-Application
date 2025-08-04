@@ -8,15 +8,15 @@ import passport from "passport";
 import authRtr from "./routes/authRtr";
 import { configurePassport } from "./config/passport";
 import categoryRtr from "./routes/categoryRtr";
+import path from "path";
 
 dotenv.config();
 
 const app = express();
 
 app.use(morgan("dev"));
+
 app.set("json spaces", 5);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 configurePassport();
 
@@ -28,9 +28,18 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-app.use("/auth", authRtr);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use("/", gameRtr);
+
+app.use("/auth", authRtr);
 app.use("/categories", categoryRtr);
+
+const UPLOAD_DIR_NAME = "uploads";
+app.use(
+  `/${UPLOAD_DIR_NAME}`,
+  express.static(path.join(process.cwd(), UPLOAD_DIR_NAME))
+);
 
 app.use(errorHandler);
 

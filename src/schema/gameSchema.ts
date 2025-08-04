@@ -54,7 +54,7 @@ export class zodSchema {
       .optional(),
     description: z
       .string()
-      .min(10, "Description must be at least 10 characters long.")
+      .min(3, "Description must be at least 10 characters long.")
       .max(1000, "Description cannot exceed 1000 characters.")
       .optional(),
     price: z
@@ -66,7 +66,7 @@ export class zodSchema {
     releaseDate: z
       .preprocess(
         (a) => new Date(a as string),
-        z.date().max(new Date(), "Release date cannot be in the future.")
+        z.date().max(new Date(), "Release date can't be in the future")
       )
       .optional(),
     rating: z
