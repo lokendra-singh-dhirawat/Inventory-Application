@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { categoryCntrl } from "../controllers/categoryCntrl"; // Import the controller instance
+import { categoryCntrl } from "../controllers/categoryCntrl";
 
 const router = Router();
 
