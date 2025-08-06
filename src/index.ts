@@ -31,9 +31,9 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/", gameRtr);
-
 app.use("/auth", authRtr);
 app.use("/categories", categoryRtr);
+app.use("/healthcheck", require("./routes/systemHealthCheckRtr").default);
 
 const UPLOAD_DIR_NAME = "uploads";
 app.use(
