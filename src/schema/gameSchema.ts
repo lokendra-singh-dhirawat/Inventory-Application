@@ -26,24 +26,19 @@ export class zodSchema {
         .max(5, "Rating must be a number between 0 and 5")
     ),
 
-    categoryIds: z.union([
-      z
-        .array(
-          z.preprocess(
-            (a) => Number(a),
-            z.number().int().positive("Category ID must be a positive integer.")
-          )
-        )
-        .min(1, "At least one category is required."),
-      z.preprocess(
-        (a) => [Number(a)],
-        z
-          .array(
-            z.number().int().positive("Category ID must be a positive integer.")
-          )
-          .length(1)
-      ),
-    ]),
+    categoryIds: z.preprocess((val) => {
+      if (Array.isArray(val)) return val;
+      if (typeof val === "string") {
+        if (val.includes(",")) {
+          return val
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+        }
+        return [val];
+      }
+      return val;
+    }, z.array(z.coerce.number().int().positive("Category ID must be a positive integer.")).min(1, "At least one category is required.")),
   });
 
   static updateGameSchema = z.object({
