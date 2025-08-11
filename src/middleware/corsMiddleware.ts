@@ -14,17 +14,20 @@ const corsMiddleware: RequestHandler = (req, res, next) => {
       host = new URL(origin).hostname;
     } catch {}
 
-    if (ALLOW.has(origin) || host.endsWith(".vercel.app")) {
+    if (origin && (ALLOW.has(origin) || host.endsWith(".vercel.app"))) {
       res.setHeader("Access-Control-Allow-Origin", origin);
       res.setHeader("Vary", "Origin");
       res.setHeader("Access-Control-Allow-Credentials", "true");
-      res.setHeader(
-        "Access-Control-Allow-Methods",
-        "GET,HEAD,PUT,PATCH,POST,DELETE"
-      );
+
       res.setHeader(
         "Access-Control-Allow-Headers",
-        "Content-Type, Authorization"
+        req.header("Access-Control-Request-Headers") ||
+          "Content-Type, Authorization"
+      );
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        req.header("Access-Control-Request-Method") ||
+          "GET,HEAD,PUT,PATCH,POST,DELETE"
       );
     }
   }

@@ -20,6 +20,7 @@ app.set("json spaces", 5);
 app.use(passport.initialize());
 configurePassport();
 
+app.set("trust proxy", 1);
 app.use(corsMiddleware);
 
 app.use(express.json());
