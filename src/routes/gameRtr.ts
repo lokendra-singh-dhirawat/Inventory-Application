@@ -31,7 +31,6 @@ router.post(
   authenticated,
   upload.single("image"),
   validationMiddleware.validateBody(zodSchema.createSchema),
-  AuthorizeUserOrAdmin("Game"),
   gameCntrl.createGameCntrl
 );
 
