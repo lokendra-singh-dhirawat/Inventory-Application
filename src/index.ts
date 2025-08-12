@@ -24,7 +24,7 @@ configurePassport();
 
 app.set("trust proxy", 1);
 app.use(corsMiddleware);
-app.options("*", cors(corsMiddleware));
+app.options("*", corsMiddleware);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
