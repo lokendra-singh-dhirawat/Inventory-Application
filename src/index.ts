@@ -9,6 +9,8 @@ import { configurePassport } from "./config/passport";
 import categoryRtr from "./routes/categoryRtr";
 import path from "path";
 import corsMiddleware from "./middleware/corsMiddleware";
+import type { ParamsDictionary } from "express-serve-static-core";
+import type { ParsedQs } from "qs";
 
 dotenv.config();
 
@@ -22,6 +24,7 @@ configurePassport();
 
 app.set("trust proxy", 1);
 app.use(corsMiddleware);
+app.options("*", cors(corsMiddleware));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -44,3 +47,20 @@ app.listen(PORT, () => {
 });
 
 export default app;
+function cors(
+  corsMiddleware: express.RequestHandler<
+    ParamsDictionary,
+    any,
+    any,
+    ParsedQs,
+    Record<string, any>
+  >
+): import("express-serve-static-core").RequestHandler<
+  {},
+  any,
+  any,
+  import("qs").ParsedQs,
+  Record<string, any>
+> {
+  throw new Error("Function not implemented.");
+}
