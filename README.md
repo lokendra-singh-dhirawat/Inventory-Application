@@ -34,3 +34,6 @@ Technologies Used
 - Validation: Zod
 - Logging: Morgan, Winston
 - Environment Variables: dotenv
+
+check out frontend - <https://inventory-frontend-yjxe.vercel.app>
+
